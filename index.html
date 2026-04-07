@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎬</text></svg>">
     <title>CineMax</title>
     <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
@@ -611,10 +610,10 @@
     }
 
     async function searchMovies() {
-        let q = document.getElementById('searchInput').value.trim();
-        if (!q) return;
+        const original = document.getElementById('searchInput').value.trim();
+        if (!original) return;
 
-        // Extract year if present e.g. "baby 2023" → query="baby", year=2023
+        let q = original;
         let year = null;
         const yearMatch = q.match(/\b(19|20)\d{2}\b/);
         if (yearMatch) {
@@ -623,17 +622,26 @@
         }
 
         showLoading();
-        document.getElementById('sectionTitle').innerHTML = `🔍 <span>"${q}${year ? ' ' + year : ''}"</span> Results`;
+        document.getElementById('sectionTitle').innerHTML = `🔍 <span>"${original}"</span> Results`;
         setActiveGenre(null);
 
         let url = `${BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(q)}`;
-        if (year) url += `&year=${year}`;
-
+        if (year) url += `&primary_release_year=${year}`;
         let movies = await fetchMovies(url);
 
-        // Fuzzy fallback — if no results, try without year
+        // Fallback 1 - without year filter, sort by year match
         if (!movies.length && year) {
             movies = await fetchMovies(`${BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(q)}`);
+            movies = movies.sort((a, b) => {
+                const aY = a.release_date?.startsWith(year) ? 0 : 1;
+                const bY = b.release_date?.startsWith(year) ? 0 : 1;
+                return aY - bY;
+            });
+        }
+
+        // Fallback 2 - search full original query
+        if (!movies.length) {
+            movies = await fetchMovies(`${BASE}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(original)}`);
         }
 
         renderMovies(movies);

@@ -448,7 +448,7 @@
     <button class="genre-btn" onclick="loadGenre(14, this)">🧙 Fantasy</button>
 </div>
 
-<div class="section-title" id="sectionTitle">🔥 <span>TRENDING</span> දැන්</div>
+<div class="section-title" id="sectionTitle">🔥 <span>TRENDING</span> now</div>
 <div class="movies-grid" id="moviesGrid">
     <div class="loading">
         <div class="spinner"></div>
@@ -659,7 +659,7 @@
     async function loadTrending(btn) {
         setActiveGenre(btn);
         showLoading();
-        document.getElementById('sectionTitle').innerHTML = '🔥 <span>TRENDING</span> දැන්';
+        document.getElementById('sectionTitle').innerHTML = '🔥 <span>TRENDING</span> now';
         const movies = await fetchMovies(`${BASE}/trending/movie/week?api_key=${API_KEY}`);
         renderMovies(movies);
     }
